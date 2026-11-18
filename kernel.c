@@ -1,5 +1,5 @@
-
 #include <stdint.h>
+#include <stddef.h>
 
 
 // ######################################################
@@ -30,9 +30,9 @@ enum vga_color {
 #define VGA_ADDRESS		0xB8000
 #define DEFAULT_COLOR   (BLACK << 4 | WHITE)
 
-uint16_t	x;
-uint16_t	y;
-uint16_t	*visible_terminal = (uint16_t *)VGA_ADDRESS;
+static uint16_t	x; // TODO : size_t ?
+static uint16_t	y; // TODO : size_t ?
+static volatile uint16_t	*visible_terminal = (uint16_t *)VGA_ADDRESS;
 
 uint16_t	encode_char(unsigned char c, uint8_t color)
 {
@@ -49,7 +49,7 @@ void	init_terminal(void)
 	x = 0;
 	y = 0;
 
-	for (uint16_t index = 0; index < VGA_HEIGHT * VGA_WIDTH + VGA_WIDTH; ++index)
+	for (size_t index = 0; index < VGA_HEIGHT * VGA_WIDTH; ++index)
 		visible_terminal[index] = encode_char(' ', DEFAULT_COLOR);
 }
 
@@ -62,16 +62,16 @@ void	putchar(uint16_t c)
 		y ++;
 	}
 	if (y >= VGA_HEIGHT)
-		y = 0;
+		y = 0; // TODO : SCROLL
 }
 
 void	write(const char *str, uint8_t color)
 {
-	for (int i = 0; str[i]; ++i)
+	for (size_t i = 0; str[i]; ++i)
 		putchar(encode_char(str[i], color));
 }
 
-void	newline()
+void	newline(void)
 {
 	x = 0;
 	y ++;
