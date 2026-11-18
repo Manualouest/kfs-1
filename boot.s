@@ -8,8 +8,8 @@
 
 .section .multiboot
 .align 4
-.long FLAGS
 .long MAGIC
+.long FLAGS
 .long CHECKSUM
 
 .section .bss
