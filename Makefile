@@ -6,15 +6,23 @@ ISO_DIR     := $(BUILD_DIR)iso
 CC          := gcc
 LD          := ld
 
-LINKER		:= linker.ld
-GCONF		:= grub.cfg
+CFG_DIR 	:= config/
+
+LINKER		:= $(CFG_DIR)linker.ld
+GCONF		:= $(CFG_DIR)grub.cfg
 
 CFLAGS      := -m32 -ffreestanding -fno-builtin -fno-stack-protector \
                -nostdlib -nodefaultlibs -Wall -Wextra
 LDFLAGS     := -m elf_i386 -T $(LINKER)
 
+SRC_DIR		:= srcs/
+
 C_SRCS      := kernel.c
 ASM_SRCS    := boot.s
+
+C_SRCS		:= $(addprefix $(SRC_DIR), $(C_SRCS))
+ASM_SRCS	:= $(addprefix $(SRC_DIR), $(ASM_SRCS))
+
 
 OBJS        := $(C_SRCS:%.c=build/%.o) $(ASM_SRCS:%.s=build/%.o)
 
@@ -23,7 +31,7 @@ all: $(NAME)
 $(NAME): $(KERNEL_BIN) $(GCONF)
 	@mkdir -p $(ISO_DIR)/boot/grub
 	@cp $(KERNEL_BIN) $(ISO_DIR)/boot/kernel.bin
-	@cp grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
+	@cp $(GCONF) $(ISO_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o $(NAME) $(ISO_DIR)
 
 $(KERNEL_BIN): $(OBJS) $(LINKER)
