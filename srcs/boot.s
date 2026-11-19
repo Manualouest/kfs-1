@@ -30,3 +30,5 @@ halt_loop:
 	jmp halt_loop
 
 .size _start, . - _start
+
+.section .note.GNU-stack, "", @progbits
