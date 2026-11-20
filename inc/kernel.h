@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 23:22:23 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/21 00:05:50 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <stddef.h>
 
 // ##################################################
-// #			lib/printk.c						#
+// #			klib/printk.c						#
 // ##################################################
 
 # include <stdarg.h>
@@ -25,6 +25,14 @@
 void printk(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void printk_color(uint8_t color, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
 void vprintk(uint8_t color, const char *fmt, va_list args);
+
+// ##################################################
+// #			klib/kmem.c						#
+// ##################################################
+
+void			*memset(void *s, int c, size_t n);
+void			bzero(void *s, size_t n);
+volatile void	*memcpy(volatile void *dest, const volatile void *src, size_t n);
 
 // ##################################################
 // #			drivers/terminal.c					#
@@ -71,10 +79,6 @@ void	init_terminal(void);
 // ##################################################
 uint8_t			read_port(uint16_t port);
 void			write_port(uint16_t port, uint8_t data);
-void			*memset(void *s, int c, size_t n);
-void			bzero(void *s, size_t n);
-volatile void	*memcpy(volatile void *dest, const volatile void *src, size_t n);
-
 
 // ##################################################
 // #			drivers/devices/PS2/keyboard.c		#
