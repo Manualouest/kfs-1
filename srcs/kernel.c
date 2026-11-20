@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 18:26:55 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 17:21:50 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/20 18:14:23 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,4 +18,6 @@ void	kmain(void)
 	init_terminal();
 
 	init_devices();
+	while (1)
+		poll();
 }

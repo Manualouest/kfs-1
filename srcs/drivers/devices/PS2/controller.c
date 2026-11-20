@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:57:28 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 17:21:50 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/20 22:56:12 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,12 @@ void	debug_byte(uint8_t byte) // DEBUG
 // port 0x64 is to read status or send commands
 // port 0x60 is to read data received/return of command or send second part of command
 
-static inline int	did_controller_return()
+static inline uint8_t	did_controller_return()
 {
-	return (read_port(0x64) & 1);
+	uint8_t	status = read_port(0x64);
+	if (status & 1)
+		return (status);
+	return (0);
 }
 
 // waits for the command register to send something in the Data Port
@@ -35,7 +38,7 @@ static void	wait_controller_return()
 		;
 }
 
-static inline int	is_controller_ready()
+static inline uint8_t	is_controller_ready()
 {
 	return ((read_port(0x64) & (1 << 1)) >> 1);
 }
@@ -158,22 +161,23 @@ void	init_devices(void)
 	safe_write_port(0x60, 0xFF);
 	if (safe_read_port(0x60) == 0xFC)
 		return ;
-	if (second_device)
-	{
-		safe_write_port_second_device(0x60, 0xFF);
-		if (safe_read_port(0x60) == 0xFC)
-			return ;
-	}
+
 
 	setup_keyboard();
 	activate_mouse();
+	
 }
 
 void	poll()
 {
-
-	while (did_controller_return())
+	uint8_t	controller_status = did_controller_return();
+	while (controller_status)
 	{
+		if (controller_status & (1 << 5))
+			poll_mouse();
+		else
+			poll_keyboard();
 
+		controller_status = did_controller_return();
 	}
 }

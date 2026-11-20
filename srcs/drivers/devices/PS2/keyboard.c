@@ -6,26 +6,34 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 17:21:50 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/20 23:17:53 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
-uint8_t	keys[11] = {0};
+static uint8_t	keyboard_state = 0;
 
-// keys is a bitfield -> we need 58 different bits (scan code set 1)
-// key / 8 gives the bitfield group of the key and (key >> 8) gives the bit for the key itself
-
-inline int	is_key_pressed(uint8_t key)
+typedef enum	STATES
 {
-	return ((keys[key / 8] >> (key % 8)) & 1);
+	OFF,
+	ON
+}	STATES;
+
+typedef enum	STATE_KEY
+{
+	SHIFT,
+	CAPS,
+	NUM,
+	CTRL,
+	ALT
+}	STATE_KEY;
+
+static inline STATES	get_state_key_status(STATE_KEY key)
+{
+	return ((keyboard_state & (1 << key)) >> key);
 }
 
-inline void	set_key_value(uint8_t key, uint8_t value)
-{
-	keys[key / 8] = (keys[key / 8] & (~(1 << (key % 8)))) | (value << (key % 8));
-}
 
 void	setup_keyboard()
 {
@@ -40,3 +48,20 @@ void	setup_keyboard()
 //
 // --> try to do a sort of MVC design patern
 
+
+
+void	poll_keyboard()
+{
+	size_t	old_x = get_x();
+	size_t	old_y = get_y();
+
+	clear_zone(60, 0, 10, 25);
+	set_pos(60, 10);
+	// write("keyboard");	newline();
+	set_pos(60, 11);
+	uint8_t	scancode = safe_read_port(0x60);
+	// debug_byte(scancode);	newline();
+	set_pos(old_x, old_y);
+
+	debug_byte(scancode);	newline();
+}

@@ -25,11 +25,12 @@ GCONF		:= $(CFG_DIR)grub.cfg
 #					COMPILATION PART				 #
 ######################################################
 
+INC_DIR		:= inc/
+
 CC          := gcc
 CFLAGS      := -m32 -ffreestanding -fno-builtin -fno-stack-protector \
-               -nostdlib -nodefaultlibs -Wall -Wextra
-
-INC_DIR		:= inc/
+               -nostdlib -nodefaultlibs -Wall -Wextra \
+			   -I$(INC_DIR)
 
 SRC_DIR		:= srcs/
 
@@ -117,7 +118,7 @@ re: fclean all
 
 build/%.o: %.c
 	@mkdir -p $(dir $@)
-	@$(CC) -I$(INC_DIR) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 build/%.o: %.s
 	@mkdir -p $(dir $@)
