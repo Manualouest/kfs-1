@@ -29,9 +29,17 @@ CC          := gcc
 CFLAGS      := -m32 -ffreestanding -fno-builtin -fno-stack-protector \
                -nostdlib -nodefaultlibs -Wall -Wextra
 
+INC_DIR		:= inc/
+
 SRC_DIR		:= srcs/
 
-C_SRCS      := kernel.c
+C_SRCS      := kernel.c\
+			   drivers/utils.c\
+			   drivers/terminal.c\
+			   drivers/devices/PS2/controller.c\
+			   drivers/devices/PS2/mouse.c\
+			   drivers/devices/PS2/keyboard.c
+
 ASM_SRCS    := boot.s
 
 vpath %.c $(SRC_DIR)
@@ -108,7 +116,7 @@ re: fclean all
 
 build/%.o: %.c
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) -I$(INC_DIR) $(CFLAGS) -c $< -o $@
 
 build/%.o: %.s
 	@mkdir -p $(dir $@)
