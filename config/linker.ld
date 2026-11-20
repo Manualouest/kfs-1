@@ -8,7 +8,7 @@ PHDRS
 
 SECTIONS
 {
-    . = 1M;
+    . = 2M;
 
     .text ALIGN(4K) :
     {

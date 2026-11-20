@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 17:17:30 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/20 22:28:29 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,15 @@
 # include <stdint.h>
 # include <stddef.h>
 
+// ##################################################
+// #			lib/printk.c						#
+// ##################################################
+
+# include <stdarg.h>
+
+void printk(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+void printk_color(uint8_t color, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+void vprintk(uint8_t color, const char *fmt, va_list args);
 
 // ##################################################
 // #			drivers/terminal.c					#
@@ -38,6 +47,8 @@ enum vga_color {
 	LIGHT_BROWN = 14,
 	WHITE = 15,
 };
+
+#define DEFAULT_COLOR   0b00001111			//(BLACK << 4 | WHITE)
 
 void	putchar_color(unsigned char c, uint8_t color);
 void	putchar(unsigned char c);

@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 17:21:50 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/20 18:32:51 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #define VGA_WIDTH		80
 #define VGA_HEIGHT		25
 #define VGA_ADDRESS		0xB8000
-#define DEFAULT_COLOR   0b00001111			//(BLACK << 4 | WHITE)
 #define EMPTY_CHAR		0b0000111100100000	// ' ' in default color
 
 static size_t				x;

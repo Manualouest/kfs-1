@@ -38,7 +38,8 @@ C_SRCS      := kernel.c\
 			   drivers/terminal.c\
 			   drivers/devices/PS2/controller.c\
 			   drivers/devices/PS2/mouse.c\
-			   drivers/devices/PS2/keyboard.c
+			   drivers/devices/PS2/keyboard.c\
+			   klib/printk.c
 
 ASM_SRCS    := boot.s
 
