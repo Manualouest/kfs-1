@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:57:28 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 22:56:12 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 13:59:07 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,6 @@ void	init_devices(void)
 
 	setup_keyboard();
 	activate_mouse();
-	
 }
 
 void	poll()

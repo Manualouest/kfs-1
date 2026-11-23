@@ -6,34 +6,37 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/20 23:17:53 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 18:03:25 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
+
+enum KEYS{	NONE, KEY_ESCAPE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_BACKSPACE, KEY_TAB,
+			KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFT_BRAQUET, KEY_RIGHT_BRAQUET, KEY_ENTER, KEY_LEFT_CTRL,
+			KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_SINGLE_QUOTE, KEY_BACK_TICK, KEY_LEFT_SHIFT, KEY_BACK_SLASH,
+			KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMA, KEY_DOT, KEY_SLASH, KEY_RIGHT_SHIFT, KEY_KP_MULT, KEY_LEFT_ALT, KEY_SPACE, KEY_CAPS_LOCK,
+			KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_NUMLOCK, KEY_SCROLLLOCK,
+			KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_SUB, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_ADD, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_0, KEY_KP_DOT, KEY_F11 = 0x57, KEY_F12 };
+char			*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
+									"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "ENTER", "LEFT_CTRL",
+									"a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "`", "LEFT_SHIFT", "\\",
+									"z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "RIGHT_SHIFT", "*", "LEFT_ALT", " ", "CAPS_LOCK",
+									"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "NUM_LOCK", "SCROLL_LOCK",
+									"7", "8", "9", "-", "4", "5", "6", "+", "1", "2", "3", "0", ".", "BAD", "BAD", "BAD", "BAD" "F11", "F12"};
 static uint8_t	keyboard_state = 0;
 
-typedef enum	STATES
-{
-	OFF,
-	ON
-}	STATES;
 
-typedef enum	STATE_KEY
-{
-	SHIFT,
-	CAPS,
-	NUM,
-	CTRL,
-	ALT
-}	STATE_KEY;
-
-static inline STATES	get_state_key_status(STATE_KEY key)
+inline STATE	get_state_key_status(STATE_KEY key)
 {
 	return ((keyboard_state & (1 << key)) >> key);
 }
 
+inline void	set_state_key_status(STATE_KEY key, STATE state)
+{
+	keyboard_state = (keyboard_state & ~(1 << key)) | (state << key);
+}
 
 void	setup_keyboard()
 {
@@ -42,26 +45,104 @@ void	setup_keyboard()
 	ACK_safe_write_port(0x60, 1);
 }
 
-// ### TODO
-// key register -> call terminal to print key
-// same for mouse inputs
-//
-// --> try to do a sort of MVC design patern
+
+static int	special_keys(uint8_t keycode)
+{
+	switch (keycode)
+	{
+		case 0xE0:
+			break;
+		case KEY_BACKSPACE:
+			erase_char();
+			break;
+		case KEY_TAB:
+			putchar('\t'); // TODO handle tab :)
+			break;
+		case KEY_ENTER:
+			newline();
+			break ;
+
+		case KEY_LEFT_CTRL:
+			set_state_key_status(CTRL, ON);
+			break ;
+		case KEY_LEFT_SHIFT: case KEY_RIGHT_SHIFT:
+			set_state_key_status(SHIFT, ON);
+			break ;
+		case KEY_LEFT_ALT:
+			set_state_key_status(ALT, ON);
+			break ;
+		case KEY_CAPS_LOCK:
+			set_state_key_status(CAPS, !get_state_key_status(CAPS));
+			break ;
+		case KEY_NUMLOCK:
+			set_state_key_status(NUM, ON);
+			break ;
+		case KEY_SCROLLLOCK:
+			set_state_key_status(SCRL, ON);
+			break ;
 
 
+		default:
+			if (keycode > KEY_F12)
+				break;
+			return (0);
+	}
+	if (keycode > KEY_F12)
+	{
+		keycode -= 0x80;
+		switch (keycode)
+		{
+			case 0xE0: case KEY_BACKSPACE: case KEY_TAB: case KEY_ENTER:
+				break ;
+
+			case KEY_LEFT_CTRL:
+				set_state_key_status(CTRL, OFF);
+				break ;
+			case KEY_LEFT_SHIFT: case KEY_RIGHT_SHIFT:
+				set_state_key_status(SHIFT, OFF);
+				break ;
+			case KEY_LEFT_ALT:
+				set_state_key_status(ALT, OFF);
+				break ;
+			case KEY_NUMLOCK:
+				set_state_key_status(NUM, OFF);
+				break ;
+			case KEY_SCROLLLOCK:
+				set_state_key_status(SCRL, OFF);
+				break ;
+			
+			default:
+				return (0);
+		}
+	}
+	return (1);
+}
+
+static int	is_alpha(char c)
+{
+	return ('a' <= c && c <= 'z');
+}
 
 void	poll_keyboard()
 {
-	size_t	old_x = get_x();
-	size_t	old_y = get_y();
-
-	clear_zone(60, 0, 10, 25);
-	set_pos(60, 10);
-	// write("keyboard");	newline();
-	set_pos(60, 11);
 	uint8_t	scancode = safe_read_port(0x60);
-	// debug_byte(scancode);	newline();
-	set_pos(old_x, old_y);
 
-	debug_byte(scancode);	newline();
+	update_mouse_pos();
+
+	if (special_keys(scancode))
+		return ;
+
+	if (scancode > KEY_F12)
+		return ;
+
+	if (get_state_key_status(CTRL))
+		return ;
+
+	if (get_state_key_status(ALT))
+		return ;
+
+	if ((get_state_key_status(SHIFT) || get_state_key_status(CAPS)) && is_alpha(key_values[scancode][0]))
+		printk("%c", 'A' + (key_values[scancode][0] - 'a'));
+	else
+		printk("%s", key_values[scancode]);
 }

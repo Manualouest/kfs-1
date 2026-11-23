@@ -41,7 +41,8 @@ C_SRCS      := kernel.c\
 			   drivers/devices/PS2/mouse.c\
 			   drivers/devices/PS2/keyboard.c\
 			   klib/printk.c\
-			   klib/kmem.c
+			   klib/kmem.c\
+			   klib/cast.c
 
 ASM_SRCS    := boot.s
 
@@ -126,3 +127,7 @@ build/%.o: %.s
 	
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+
+
+# mewen a dit ca marche aussi
+# qemu-system-i386 -serial stdio --kernel build/kernel.bin
