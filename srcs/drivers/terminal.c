@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 19:12:58 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/23 20:32:25 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,14 @@ void	newline(void)
 	x = 0;
 	y ++;
 	verify_pos();
-	set_cursor_pos(0, y);
+	set_cursor_pos(x, y);
+}
+
+void	tabulation(void)
+{
+	x = (x + 4) & ~3;
+	verify_pos();
+	set_cursor_pos(x, y);
 }
 
 void	set_pos(size_t nx, size_t ny)
@@ -254,8 +261,17 @@ void	clear_screen(void)
 
 void	erase_char(void)
 {
-	if (x == 0)
+	if (x == 0) // TODO : BETTER
+	{
+		if (y == 0)
+			return ;
+		x = FULL_WIDTH - 1;
+		y --;
+		move_cursor(x, -1);
+		visible_terminal[y * VGA_WIDTH + x] = EMPTY_CHAR;
+		buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
 		return ;
+	}
 
 	move_cursor(-1, 0);
 	x --;

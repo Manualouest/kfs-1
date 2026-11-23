@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 19:15:44 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/23 20:13:13 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ void		putchar(unsigned char c);
 void		write_color(const char *str, uint8_t color);
 void		write(const char *str);
 void		newline(void);
+void		tabulation(void);
 void		set_pos(size_t nx, size_t ny);
 void		clear_line(size_t y);
 void		clear_zone(size_t target_x, size_t target_y, size_t size_x, size_t size_y);
@@ -120,8 +121,8 @@ typedef enum	STATE_KEY
 
 void	setup_keyboard(void);
 void	poll_keyboard(void);
-STATE	get_state_key_status(STATE_KEY key);
-void	set_state_key_status(STATE_KEY key, STATE status);
+//STATE	get_state_key_status(STATE_KEY key); // TODO : DELETE ?
+//void	set_state_key_status(STATE_KEY key, STATE status); // TODO : DELETE ?
 
 // ##################################################
 // #			drivers/devices/PS2/mouse.c			#

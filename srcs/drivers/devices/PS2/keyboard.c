@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 19:15:10 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/23 20:13:27 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,26 +19,26 @@ enum KEYS{	NONE, KEY_ESCAPE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KE
 			KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMA, KEY_DOT, KEY_SLASH, KEY_RIGHT_SHIFT, KEY_KP_MULT, KEY_LEFT_ALT, KEY_SPACE, KEY_CAPS_LOCK,
 			KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_NUMLOCK, KEY_SCROLLLOCK,
 			KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_SUB, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_ADD, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_0, KEY_KP_DOT, KEY_F11 = 0x57, KEY_F12 };
-char		*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
+static const char		*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
 									"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "ENTER", "LEFT_CTRL",
 									"a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "`", "LEFT_SHIFT", "\\",
 									"z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "RIGHT_SHIFT", "*", "LEFT_ALT", " ", "CAPS_LOCK",
 									"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "NUM_LOCK", "SCROLL_LOCK",
-									"7", "8", "9", "-", "4", "5", "6", "+", "1", "2", "3", "0", ".", "BAD", "BAD", "BAD", "BAD" "F11", "F12"};
+									"7", "8", "9", "-", "4", "5", "6", "+", "1", "2", "3", "0", ".", "BAD", "BAD", "BAD", "BAD" "F11", "F12"}; // TODO : MISSING , 3 BAD not four ?
 static uint8_t	keyboard_state = 0;
 
 
-inline STATE	get_state_key_status(STATE_KEY key)
+static inline STATE	get_state_key_status(STATE_KEY key)
 {
 	return ((keyboard_state & (1 << key)) >> key);
 }
 
-inline void	set_state_key_status(STATE_KEY key, STATE state)
+static inline void	set_state_key_status(STATE_KEY key, STATE state)
 {
 	keyboard_state = (keyboard_state & ~(1 << key)) | (state << key);
 }
 
-void	setup_keyboard(void)
+void	setup_keyboard(void) // TODO : Improve
 {
 	// set scan code to 1 -> this changes the code made by keys
 	safe_write_port(0x60, 0xF0);
@@ -56,7 +56,7 @@ static int	special_keys(uint8_t keycode)
 			erase_char();
 			break;
 		case KEY_TAB:
-			putchar('\t'); // TODO handle tab :)
+			tabulation(); // TODO handle tab :)
 			break;
 		case KEY_ENTER:
 			newline();

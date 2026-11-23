@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:57:28 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 19:14:28 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/23 20:10:11 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static inline uint8_t	is_controller_ready(void)
 }
 
 // waits for the command register to be ready to receive input
-static void	wait_controller_ready(void)
+static void	wait_controller_ready(void) // TODO : TIMEOUT ?
 {
 	while (is_controller_ready())
 		;
@@ -64,7 +64,7 @@ uint8_t	ACK_safe_write_port(uint16_t port, uint8_t data)
 	return (response);
 }
 
-void	safe_write_port_second_device(uint16_t port, uint8_t data)
+void	safe_write_port_second_device(uint16_t port, uint8_t data) // TODO : Never call 
 {
 	wait_controller_ready();
 	safe_write_port(0x64, 0xD4);
@@ -153,7 +153,7 @@ void	init_devices(void)
 		safe_write_port(0x64, 0xA8);
 
 	config_byte = get_config_byte();
-	config_byte |= 1 | (1 << 1);
+	config_byte |= 1 | (1 << 1);	// TODO : USELESS IF NO IDT
 	write_data_to_ram(config_byte);
 
 
@@ -164,6 +164,7 @@ void	init_devices(void)
 
 
 	setup_keyboard();
+	// TODO : if (seconde_device) ?
 	activate_mouse();
 }
 
