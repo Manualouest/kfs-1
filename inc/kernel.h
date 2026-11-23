@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 14:19:56 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 19:15:44 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,12 +70,12 @@ enum vga_color {
 #define DEFAULT_COLOR   0b00001111			//(BLACK << 4 | WHITE)
 
 uint16_t	invert_color(uint16_t c);
-void		toggle_cursor();
+void		toggle_cursor(void);
 void		set_cursor_pos(int x, int y);
 uint16_t	get_cursor_pos(void);
 void		move_cursor(int move_x, int move_y);
-void		scroll_up();
-void		scroll_down();
+void		scroll_up(void);
+void		scroll_down(void);
 void		putchar_color(unsigned char c, uint8_t color);
 void		putchar(unsigned char c);
 void		write_color(const char *str, uint8_t color);
@@ -84,11 +84,11 @@ void		newline(void);
 void		set_pos(size_t nx, size_t ny);
 void		clear_line(size_t y);
 void		clear_zone(size_t target_x, size_t target_y, size_t size_x, size_t size_y);
-void		clear_screen();
-void		erase_char();
-uint16_t	get_curr_char();
-size_t		get_x();
-size_t		get_y();
+void		clear_screen(void);
+void		erase_char(void);
+uint16_t	get_curr_char(void);
+size_t		get_x(void);
+size_t		get_y(void);
 void		init_terminal(void);
 
 
@@ -118,17 +118,17 @@ typedef enum	STATE_KEY
 	SCRL
 }	STATE_KEY;
 
-void	setup_keyboard();
-void	poll_keyboard();
+void	setup_keyboard(void);
+void	poll_keyboard(void);
 STATE	get_state_key_status(STATE_KEY key);
 void	set_state_key_status(STATE_KEY key, STATE status);
 
 // ##################################################
 // #			drivers/devices/PS2/mouse.c			#
 // ##################################################
-void	update_mouse_pos();
+void	update_mouse_pos(void);
 void	activate_mouse(void);
-void	poll_mouse();
+void	poll_mouse(void);
 
 
 // ##################################################
@@ -141,7 +141,7 @@ void	safe_write_port_second_device(uint16_t port, uint8_t data);
 uint8_t	ACK_safe_write_port_second_device(uint16_t port, uint8_t data);
 uint8_t	safe_read_port(uint16_t port);
 void	init_devices(void);
-void	poll();
+void	poll(void);
 
 
 

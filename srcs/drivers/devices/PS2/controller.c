@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:57:28 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 13:59:07 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 19:14:28 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	debug_byte(uint8_t byte) // DEBUG
 // port 0x64 is to read status or send commands
 // port 0x60 is to read data received/return of command or send second part of command
 
-static inline uint8_t	did_controller_return()
+static inline uint8_t	did_controller_return(void)
 {
 	uint8_t	status = read_port(0x64);
 	if (status & 1)
@@ -32,19 +32,19 @@ static inline uint8_t	did_controller_return()
 }
 
 // waits for the command register to send something in the Data Port
-static void	wait_controller_return()
+static void	wait_controller_return(void)
 {
 	while (!did_controller_return())
 		;
 }
 
-static inline uint8_t	is_controller_ready()
+static inline uint8_t	is_controller_ready(void)
 {
 	return ((read_port(0x64) & (1 << 1)) >> 1);
 }
 
 // waits for the command register to be ready to receive input
-static void	wait_controller_ready()
+static void	wait_controller_ready(void)
 {
 	while (is_controller_ready())
 		;
@@ -87,7 +87,7 @@ uint8_t	safe_read_port(uint16_t port)
 	return (data);
 }
 
-static uint8_t	get_config_byte()
+static uint8_t	get_config_byte(void)
 {
 	safe_write_port(0x64, 0x20);
 	uint8_t	controller_config_byte = safe_read_port(0x60);
@@ -100,7 +100,7 @@ static void	write_data_to_ram(uint8_t data)
 	safe_write_port(0x60, data);
 }
 
-static void	flush()
+static void	flush(void) // TODO flush all byte
 {
 	read_port(0x60);
 }
@@ -167,7 +167,7 @@ void	init_devices(void)
 	activate_mouse();
 }
 
-void	poll()
+void	poll(void)
 {
 	uint8_t	controller_status = did_controller_return();
 	while (controller_status)

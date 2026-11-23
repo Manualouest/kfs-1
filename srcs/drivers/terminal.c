@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 18:04:12 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 19:12:58 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static size_t				scroll_y;
 static size_t				offset_y;
 static volatile uint16_t	buffer_terminal[FULL_HEIGHT * FULL_WIDTH] = {0};
 
-static void	evil_scroll_down();
+static void	evil_scroll_down(void);
 
 static int	cursos_status;
 
@@ -44,7 +44,7 @@ inline uint16_t	invert_color(uint16_t c)
 	return (((c & 01111000000000000) >> 4) | ((c & 00000111100000000) << 4) | (c & 0b11111111));
 }
 
-void	toggle_cursor()
+void	toggle_cursor(void)
 {
 	cursos_status = !cursos_status;
 	if (cursos_status)
@@ -95,7 +95,7 @@ void	move_cursor(int move_x, int move_y)
 	set_cursor_pos(pos_x, pos_y);
 }
 
-static void	verify_pos()
+static void	verify_pos(void)
 {
 	if (x >= VGA_WIDTH)
 	{
@@ -110,7 +110,7 @@ static void	verify_pos()
 	}
 }
 
-void	scroll_up()
+void	scroll_up(void)
 {
 	if (scroll_y == 0)
 		return ;
@@ -124,7 +124,7 @@ void	scroll_up()
 	move_cursor(0, 1);
 }
 
-void	scroll_down()
+void	scroll_down(void)
 {
 	if (scroll_y == FULL_HEIGHT - VGA_HEIGHT || offset_y == 0)
 		return ;
@@ -138,7 +138,7 @@ void	scroll_down()
 	move_cursor(0, -1);
 }
 
-static void	evil_scroll_down()
+static void	evil_scroll_down(void)
 {
 	if (scroll_y == FULL_HEIGHT - VGA_HEIGHT)
 	{
@@ -240,7 +240,7 @@ void	clear_zone(size_t target_x, size_t target_y, size_t size_x, size_t size_y)
 	}
 }
 
-void	clear_screen()
+void	clear_screen(void)
 {
 	for (size_t index = 0; index < VGA_HEIGHT * VGA_WIDTH; ++index)
 		visible_terminal[index] = encode_char(' ', DEFAULT_COLOR);
@@ -252,29 +252,29 @@ void	clear_screen()
 	y = 0;
 }
 
-void	erase_char()
+void	erase_char(void)
 {
 	if (x == 0)
 		return ;
 
 	move_cursor(-1, 0);
 	x --;
-	
+
 	visible_terminal[y * VGA_WIDTH + x] = EMPTY_CHAR;
 	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
 }
 
-uint16_t	get_curr_char()
+uint16_t	get_curr_char(void)
 {
 	return (visible_terminal[y * VGA_HEIGHT + x]);
 }
 
-size_t	get_x()
+size_t	get_x(void)
 {
 	return (x);
 }
 
-size_t	get_y()
+size_t	get_y(void)
 {
 	return (y);
 }

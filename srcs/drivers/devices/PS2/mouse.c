@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 18:48:51 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 18:04:36 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/23 19:15:33 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static void	set_resolution(uint8_t resolution)
 	ACK_safe_write_port_second_device(0x60, resolution);
 }
 
-static uint8_t get_mouseID()
+static uint8_t get_mouseID(void)
 {
 	ACK_safe_write_port_second_device(0x60, 0xF2);
 	uint8_t	mouseID = safe_read_port(0x60);
@@ -108,7 +108,7 @@ static void	process_inputs(uint8_t bytes[4])
 		scroll_up();
 }
 
-void	update_mouse_pos()
+void	update_mouse_pos(void)
 {
 	uint16_t	raw_pos = get_cursor_pos();
 	int			pos_x = (int)(raw_pos % VGA_WIDTH);
@@ -118,7 +118,7 @@ void	update_mouse_pos()
 	mouse_y = pos_y;
 }
 
-void	poll_mouse()
+void	poll_mouse(void)
 {
 	static	int		nb_recv = 0;
 	static	uint8_t	bytes[4] = {0};
