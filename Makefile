@@ -42,7 +42,8 @@ C_SRCS      := kernel.c\
 			   drivers/devices/PS2/keyboard.c\
 			   klib/printk.c\
 			   klib/kmem.c\
-			   klib/cast.c
+			   klib/cast.c\
+			   klib/kstr.c
 
 ASM_SRCS    := boot.s
 

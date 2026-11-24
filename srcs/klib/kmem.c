@@ -6,13 +6,13 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/21 00:05:00 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/21 00:05:03 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 18:32:42 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
-volatile void	*memcpy(volatile void *dest, const volatile void *src, size_t n)
+void	*memcpy(void *dest, const void *src, size_t n)
 {
 	for (size_t i = 0; i < n; ++i)
 		((unsigned char *)dest)[i] = ((unsigned char *)src)[i];

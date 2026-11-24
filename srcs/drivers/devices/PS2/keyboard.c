@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:20:25 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 18:46:23 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@ int	setup_keyboard(void)
 	return (1);
 }
 
-
+// TODO : change get_status to flag instead of just key
+// TODO : stop backspace, enter and tab when ctrl or alt is on
 static int	special_keys(uint8_t keycode)
 {
 	switch (keycode)

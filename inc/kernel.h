@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:19:48 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 18:41:06 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,17 @@
 # include <stdint.h>
 # include <stddef.h>
 
+
+// ##################################################
+// #			klib/kstr.c							#
+// ##################################################
+size_t	strlen(const char *str);
+int	strcmp(const char *str1, const char *str2);
+
+
 // ##################################################
 // #			klib/printk.c						#
 // ##################################################
-
 # include <stdarg.h>
 
 void printk(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
@@ -30,10 +37,9 @@ void vprintk(uint8_t color, const char *fmt, va_list args);
 // ##################################################
 // #			klib/kmem.c							#
 // ##################################################
-
-void			*memset(void *s, int c, size_t n);
-void			bzero(void *s, size_t n);
-volatile void	*memcpy(volatile void *dest, const volatile void *src, size_t n);
+void	*memset(void *s, int c, size_t n);
+void	bzero(void *s, size_t n);
+void	*memcpy(void *dest, const void *src, size_t n);
 
 
 // ##################################################
