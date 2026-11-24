@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:41:06 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 20:03:32 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,12 +117,13 @@ typedef enum	STATE
 
 typedef enum	STATE_KEY
 {
-	SHIFT,
-	CAPS,
-	NUM,
-	CTRL,
-	ALT,
-	SCRL
+	INVALID,
+	SHIFT	= 0b1,
+	CAPS	= 0b10,
+	NUM		= 0b100,
+	CTRL	= 0b1000,
+	ALT		= 0b10000,
+	SCRL	= 0b100000
 }	STATE_KEY;
 
 int		setup_keyboard(void);

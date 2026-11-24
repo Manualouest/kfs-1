@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:46:23 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 20:15:57 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,10 @@
 enum KEYS{	NONE, KEY_ESCAPE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_BACKSPACE, KEY_TAB,
 			KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFT_BRAQUET, KEY_RIGHT_BRAQUET, KEY_ENTER, KEY_LEFT_CTRL,
 			KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_SINGLE_QUOTE, KEY_BACK_TICK, KEY_LEFT_SHIFT, KEY_BACK_SLASH,
-			KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMA, KEY_DOT, KEY_SLASH, KEY_RIGHT_SHIFT, KEY_KP_MULT, KEY_LEFT_ALT, KEY_SPACE, KEY_CAPS_LOCK,
-			KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_NUMLOCK, KEY_SCROLLLOCK,
-			KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_SUB, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_ADD, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_0, KEY_KP_DOT, BAD, BAD1, BAD2, KEY_F11, KEY_F12 };
+			KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMA, KEY_DOT, KEY_SLASH, KEY_RIGHT_SHIFT, KEY_KP_MULT, KEY_LEFT_ALT, KEY_SPACE,
+			KEY_CAPS_LOCK, KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_NUM_LOCK, KEY_SCROLL_LOCK,
+			KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_SUB, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_ADD, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_0,
+			KEY_KP_DOT, BAD, BAD1, BAD2, KEY_F11, KEY_F12 };
 static const char		*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
 									"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "ENTER", "LEFT_CTRL",
 									"a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "`", "LEFT_SHIFT", "\\",
@@ -30,12 +31,12 @@ static uint8_t	keyboard_state = 0;
 
 inline STATE	get_state_key_status(STATE_KEY key)
 {
-	return ((keyboard_state & (1 << key)) >> key);
+	return (keyboard_state & key);
 }
 
 static inline void	set_state_key_status(STATE_KEY key, STATE state)
 {
-	keyboard_state = (keyboard_state & ~(1 << key)) | (state << key);
+	keyboard_state = (keyboard_state & ~key) | (state ? 0xFF & key : 0);
 }
 
 int	setup_keyboard(void)
@@ -49,8 +50,6 @@ int	setup_keyboard(void)
 	return (1);
 }
 
-// TODO : change get_status to flag instead of just key
-// TODO : stop backspace, enter and tab when ctrl or alt is on
 static int	special_keys(uint8_t keycode)
 {
 	switch (keycode)
@@ -59,13 +58,16 @@ static int	special_keys(uint8_t keycode)
 			flush(); // TODO : decide if we handle some special keys such as the arrows.
 			break;
 		case KEY_BACKSPACE:
-			erase_char();
+			if (!get_state_key_status(CTRL | ALT))
+				erase_char();
 			break;
 		case KEY_TAB:
-			tabulation();
+			if (!get_state_key_status(CTRL | ALT))
+				tabulation();
 			break;
 		case KEY_ENTER:
-			newline();
+			if (!get_state_key_status(CTRL | ALT))
+				newline();
 			break ;
 
 		case KEY_LEFT_CTRL:
@@ -80,10 +82,10 @@ static int	special_keys(uint8_t keycode)
 		case KEY_CAPS_LOCK:
 			set_state_key_status(CAPS, !get_state_key_status(CAPS));
 			break ;
-		case KEY_NUMLOCK:
+		case KEY_NUM_LOCK:
 			set_state_key_status(NUM, !get_state_key_status(NUM));
 			break ;
-		case KEY_SCROLLLOCK:
+		case KEY_SCROLL_LOCK:
 			set_state_key_status(SCRL, !get_state_key_status(SCRL));
 			break ;
 
@@ -114,7 +116,7 @@ static int	special_keys(uint8_t keycode)
 			case KEY_LEFT_ALT:
 				set_state_key_status(ALT, OFF);
 				break ;
-			
+
 			default:
 				return (0);
 		}
@@ -168,5 +170,6 @@ int	poll_keyboard(void)
 		printk("%c", 'A' + (key_values[scancode][0] - 'a'));
 	else
 		printk("%c", key_values[scancode][0]);
+
 	return (1);
 }
