@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 20:32:25 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/24 18:24:14 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,12 +159,29 @@ static void	evil_scroll_down(void)
 	move_cursor(0, 1);
 }
 
+static int	is_special_char(unsigned char c)
+{
+	switch (c)
+	{
+		case '\n':
+			newline();
+			break;
+		case '\t':
+			tabulation();
+			break;
+		
+		default:
+			return (0);
+	}
+	return (1);
+}
+
 void	putchar_color(unsigned char c, uint8_t color)
 {
 	while (offset_y > 0)
 		scroll_down();
-	if (c == '\n')
-		newline();
+	if (is_special_char(c))
+		return ;
 
 	visible_terminal[y * VGA_WIDTH + x] = encode_char(c, color);
 	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, color);
@@ -177,8 +194,8 @@ void	putchar(unsigned char c)
 {
 	while (offset_y > 0)
 		scroll_down();
-	if (c == '\n')
-		newline();
+	if (is_special_char(c))
+		return ;
 
 	visible_terminal[y * VGA_WIDTH + x] = encode_char(c, DEFAULT_COLOR);
 	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, DEFAULT_COLOR);
@@ -259,14 +276,24 @@ void	clear_screen(void)
 	y = 0;
 }
 
+static size_t	find_last_char(size_t line)
+{
+	size_t	line_x = VGA_WIDTH;
+
+	for (; line_x > 0; --line_x)
+		if (visible_terminal[line * VGA_WIDTH + line_x] != EMPTY_CHAR)
+			break;
+	return (line_x + (line_x != VGA_WIDTH - 1 && line_x != 0));
+}
+
 void	erase_char(void)
 {
-	if (x == 0) // TODO : BETTER
+	if (x == 0)
 	{
 		if (y == 0)
 			return ;
-		x = FULL_WIDTH - 1;
 		y --;
+		x = find_last_char(y);
 		move_cursor(x, -1);
 		visible_terminal[y * VGA_WIDTH + x] = EMPTY_CHAR;
 		buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;

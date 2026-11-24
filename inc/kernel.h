@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/23 20:13:13 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/24 18:19:48 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,30 +119,30 @@ typedef enum	STATE_KEY
 	SCRL
 }	STATE_KEY;
 
-void	setup_keyboard(void);
-void	poll_keyboard(void);
-//STATE	get_state_key_status(STATE_KEY key); // TODO : DELETE ?
-//void	set_state_key_status(STATE_KEY key, STATE status); // TODO : DELETE ?
+int		setup_keyboard(void);
+int		poll_keyboard(void);
+STATE	get_state_key_status(STATE_KEY key);
 
 // ##################################################
 // #			drivers/devices/PS2/mouse.c			#
 // ##################################################
 void	update_mouse_pos(void);
-void	activate_mouse(void);
-void	poll_mouse(void);
+int		activate_mouse(void);
+int		poll_mouse(void);
 
 
 // ##################################################
 // #			drivers/devices/PS2/controller.c	#
 // ##################################################
 void	debug_byte(uint8_t data);
-void	safe_write_port(uint16_t port, uint8_t data);
-uint8_t	ACK_safe_write_port(uint16_t port, uint8_t data);
-void	safe_write_port_second_device(uint16_t port, uint8_t data);
-uint8_t	ACK_safe_write_port_second_device(uint16_t port, uint8_t data);
-uint8_t	safe_read_port(uint16_t port);
-void	init_devices(void);
-void	poll(void);
+int		safe_write_port(uint16_t port, uint8_t data);
+int		ACK_safe_write_port(uint16_t port, uint8_t data);
+int		safe_write_port_second_device(uint16_t port, uint8_t data);
+int		ACK_safe_write_port_second_device(uint16_t port, uint8_t data);
+int		safe_read_port(uint16_t port);
+void	flush(void);
+int		init_devices(void);
+int		poll(void);
 
 
 
