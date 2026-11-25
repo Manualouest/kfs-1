@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 19:43:54 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 20:50:45 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,14 +63,21 @@ static int	special_keys(uint8_t keycode)
 	switch (keycode)
 	{
 		case 0xE0:
-			flush(); // TODO : decide if we handle some special keys such as the arrows.
+			flush();
 			break;
 		case KEY_BACKSPACE:
 			if (!get_state_key_status(CTRL | ALT))
 				erase_char();
 			break;
 		case KEY_TAB:
-			if (!get_state_key_status(CTRL | ALT))
+			if (get_state_key_status(ALT))
+			{
+				if (get_state_key_status(SHIFT))
+					switch_window(-1);
+				else
+					switch_window(1);
+			}
+			else if (!get_state_key_status(CTRL))
 				tabulation();
 			break;
 		case KEY_ENTER:

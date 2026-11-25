@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 18:48:51 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 19:36:25 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 20:20:42 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int	activate_mouse(void)
 		return (0);
 
 	// slow down mouse
-	if (!set_sample_rate(0x16)) // 80
+	if (!set_sample_rate(0x16)) //set sample rate to 80
 		return (0);
 
 	// enable automatic mouvement packet generation

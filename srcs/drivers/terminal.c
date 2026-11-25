@@ -6,14 +6,16 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 19:41:06 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 21:01:53 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
+#include <art.h>
 
 #define FULL_WIDTH		80
 #define FULL_HEIGHT		100
+#define NB_WINDOWS		5
 #define VGA_ADDRESS		0xB8000
 #define EMPTY_CHAR		0b0000111100100000	// ' ' in default color
 
@@ -23,9 +25,10 @@ static volatile uint16_t	*visible_terminal = (uint16_t *)VGA_ADDRESS;
 
 static size_t				scroll_y;
 static size_t				offset_y;
-static volatile uint16_t	buffer_terminal[FULL_HEIGHT * FULL_WIDTH] = {0};
+static size_t				curr_window;
+static volatile uint16_t	buffer_terminal[NB_WINDOWS][FULL_HEIGHT * FULL_WIDTH] = {0};
 
-static volatile uint16_t	clipboard[VGA_HEIGHT + 1][VGA_WIDTH + 1] = {0}; // TODO: change buffer to a line by line
+static volatile uint16_t	clipboard[VGA_HEIGHT + 1][VGA_WIDTH + 1] = {0};
 
 static void	evil_scroll_down(void);
 
@@ -44,6 +47,44 @@ static inline uint8_t	setup_color(uint8_t front, uint8_t back)
 inline uint16_t	invert_color(uint16_t c)
 {
 	return (((c & 0b1111000000000000) >> 4) | ((c & 0b0000111100000000) << 4) | (c & 0b11111111));
+}
+
+static size_t	find_last_char(size_t line)
+{
+	size_t	line_x = VGA_WIDTH;
+
+	for (; line_x > 0; --line_x)
+		if ((visible_terminal[line * VGA_WIDTH + line_x] & 0xFF) != ' ')
+			break;
+	return (line_x + (line_x != VGA_WIDTH - 1 && line_x != 0));
+}
+
+void	switch_window(int way)
+{
+	if (curr_window == 0 && way < 0)
+		curr_window = NB_WINDOWS - 1;
+	else
+		curr_window += way;
+	if (curr_window >= NB_WINDOWS)
+		curr_window = 0;
+	
+	for (size_t index = 0; index < VGA_HEIGHT * VGA_WIDTH; ++index)
+		visible_terminal[index] = encode_char(' ', DEFAULT_COLOR);
+
+	set_pos(0, 0);
+	scroll_y = 0;
+	offset_y = 0;
+
+	int	len = FULL_HEIGHT * FULL_WIDTH - 1;
+	while (len >= 0 && (buffer_terminal[curr_window][len] & 0xFF) == ' ')
+		len --;
+	int	i = 0;
+	while (i <= len)
+	{
+		putchar_color(buffer_terminal[curr_window][i], buffer_terminal[curr_window][i] >> 8);
+		i ++;
+	}
+	set_pos(x, y);
 }
 
 void	toggle_cursor(void)
@@ -101,14 +142,15 @@ static void	verify_pos(void)
 {
 	if (x >= VGA_WIDTH)
 	{
-		move_cursor(-(x - 1), 1);
 		x = 0;
 		y ++;
+		set_cursor_pos(x, y);
 	}
 	if (y >= VGA_HEIGHT)
 	{
 		evil_scroll_down();
 		y = VGA_HEIGHT - 1;
+		set_cursor_pos(x, y);
 	}
 }
 
@@ -121,7 +163,7 @@ void	scroll_up(void)
 
 	size_t	buffer_offset = scroll_y * FULL_WIDTH;
 	for (size_t i = 0; i < VGA_HEIGHT * VGA_WIDTH; ++i)
-		visible_terminal[i] = buffer_terminal[buffer_offset + i];
+		visible_terminal[i] = buffer_terminal[curr_window][buffer_offset + i];
 
 	move_cursor(0, 1);
 }
@@ -135,7 +177,7 @@ void	scroll_down(void)
 
 	size_t	buffer_offset = scroll_y * FULL_WIDTH;
 	for (size_t i = 0; i < VGA_HEIGHT * VGA_WIDTH; ++i)
-		visible_terminal[i] = buffer_terminal[buffer_offset + i];
+		visible_terminal[i] = buffer_terminal[curr_window][buffer_offset + i];
 
 	move_cursor(0, -1);
 }
@@ -145,18 +187,18 @@ static void	evil_scroll_down(void)
 	if (scroll_y == FULL_HEIGHT - VGA_HEIGHT)
 	{
 		for (size_t i = 0; i < FULL_HEIGHT * FULL_WIDTH - FULL_WIDTH; ++i)
-			buffer_terminal[i] = buffer_terminal[i + FULL_WIDTH];
+			buffer_terminal[curr_window][i] = buffer_terminal[curr_window][i + FULL_WIDTH];
 		clear_line(VGA_HEIGHT - 1);
 		size_t	buffer_offset = scroll_y * FULL_WIDTH;
 		for (size_t i = 0; i < VGA_HEIGHT * VGA_WIDTH; ++i)
-			visible_terminal[i] = buffer_terminal[buffer_offset + i];
+			visible_terminal[i] = buffer_terminal[curr_window][buffer_offset + i];
 		return ;
 	}
 	scroll_y ++;
 
 	size_t	buffer_offset = scroll_y * FULL_WIDTH;
 	for (size_t i = 0; i < VGA_HEIGHT * VGA_WIDTH; ++i)
-		visible_terminal[i] = buffer_terminal[buffer_offset + i];
+		visible_terminal[i] = buffer_terminal[curr_window][buffer_offset + i];
 
 	move_cursor(0, 1);
 }
@@ -201,7 +243,7 @@ void	region_to_clipboard(int8_t highlight_start[2], int8_t highlight_end[2])
 	if (start[1] == end[1])
 		clip_ii = end[0] - start[0];
 	int	in_empty = 1;
-	for (int i = end[1] * VGA_WIDTH + end[0]; i >= start[1] * VGA_WIDTH + start[0]; --i) // TODO: make this a line by line copy
+	for (int i = end[1] * VGA_WIDTH + end[0]; i >= start[1] * VGA_WIDTH + start[0]; --i)
 	{
 		if (in_empty && (visible_terminal[i] & 0xFF) == ' ')
 			clipboard[clip_i][clip_ii] = 0;
@@ -284,7 +326,7 @@ void	putchar_color(unsigned char c, uint8_t color)
 		return ;
 
 	visible_terminal[y * VGA_WIDTH + x] = encode_char(c, color);
-	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, color);
+	buffer_terminal[curr_window][(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, color);
 	x ++;
 	move_cursor(1, 0);
 	verify_pos();
@@ -298,7 +340,7 @@ void	putchar(unsigned char c)
 		return ;
 
 	visible_terminal[y * VGA_WIDTH + x] = encode_char(c, DEFAULT_COLOR);
-	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, DEFAULT_COLOR);
+	buffer_terminal[curr_window][(y + scroll_y) * FULL_WIDTH + x] = encode_char(c, DEFAULT_COLOR);
 	x ++;
 	move_cursor(1, 0);
 	verify_pos();
@@ -346,7 +388,7 @@ void	clear_line(size_t target_y)
 	for (size_t i = 0; i < VGA_WIDTH; ++i)
 	{
 		visible_terminal[offset + i] = EMPTY_CHAR;
-		buffer_terminal[buffer_offset + i] = EMPTY_CHAR;
+		buffer_terminal[curr_window][buffer_offset + i] = EMPTY_CHAR;
 	}
 	if (target_y == y)
 		x = 0;
@@ -359,7 +401,7 @@ void	clear_zone(size_t target_x, size_t target_y, size_t size_x, size_t size_y)
 		for (size_t index_x = 0; index_x < size_x; ++index_x)
 		{
 			visible_terminal[(target_y + index_y) * VGA_WIDTH + (target_x + index_x)] = EMPTY_CHAR;
-			buffer_terminal[(target_y + index_y + scroll_y) * FULL_WIDTH + (target_x + index_x)] = EMPTY_CHAR;
+			buffer_terminal[curr_window][(target_y + index_y + scroll_y) * FULL_WIDTH + (target_x + index_x)] = EMPTY_CHAR;
 		}
 	}
 }
@@ -369,8 +411,9 @@ void	clear_screen(void)
 	for (size_t index = 0; index < VGA_HEIGHT * VGA_WIDTH; ++index)
 		visible_terminal[index] = encode_char(' ', DEFAULT_COLOR);
 
-	for (size_t index = 0; index < FULL_HEIGHT * FULL_WIDTH; ++index)
-		buffer_terminal[index] = encode_char(' ', DEFAULT_COLOR);
+	for (size_t window = 0; window < NB_WINDOWS; ++window)
+		for (size_t index = 0; index < FULL_HEIGHT * FULL_WIDTH; ++index)
+			buffer_terminal[window][index] = encode_char(' ', DEFAULT_COLOR);
 
 	for (size_t i = 0; i < VGA_HEIGHT + 1; ++i)
 		for (size_t ii = 0; ii < VGA_WIDTH + 1; ++ii)
@@ -378,16 +421,6 @@ void	clear_screen(void)
 
 	x = 0;
 	y = 0;
-}
-
-static size_t	find_last_char(size_t line)
-{
-	size_t	line_x = VGA_WIDTH;
-
-	for (; line_x > 0; --line_x)
-		if (visible_terminal[line * VGA_WIDTH + line_x] != EMPTY_CHAR)
-			break;
-	return (line_x + (line_x != VGA_WIDTH - 1 && line_x != 0));
 }
 
 void	erase_char(void)
@@ -400,7 +433,7 @@ void	erase_char(void)
 		x = find_last_char(y);
 		move_cursor(x, -1);
 		visible_terminal[y * VGA_WIDTH + x] = EMPTY_CHAR;
-		buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
+		buffer_terminal[curr_window][(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
 		return ;
 	}
 
@@ -408,7 +441,7 @@ void	erase_char(void)
 	x --;
 
 	visible_terminal[y * VGA_WIDTH + x] = EMPTY_CHAR;
-	buffer_terminal[(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
+	buffer_terminal[curr_window][(y + scroll_y) * FULL_WIDTH + x] = EMPTY_CHAR;
 }
 
 uint16_t	get_curr_char(void)
@@ -433,7 +466,24 @@ void	init_terminal(void)
 	scroll_y = 0;
 	offset_y = 0;
 	cursos_status = 1;
+	curr_window = 0;
 
 	clear_screen();
 	set_cursor_pos(0, 0);
+
+	printk_color(RED, forty_two1);
+	printk("\n\nthis is window 1");
+	switch_window(1);
+	printk_color(GREEN, forty_two2);
+	printk("\n\nthis is window 2");
+	switch_window(1);
+	printk_color(CYAN, forty_two3);
+	printk("\n\nthis is window 3");
+	switch_window(1);
+	printk_color(MAGENTA, forty_two4);
+	printk("\n\nthis is window 4");
+	switch_window(1);
+	printk_color(BROWN, forty_two5);
+	printk("\n\nthis is window 5");
+	switch_window(1);
 }

@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 18:58:12 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 21:03:47 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ enum vga_color {
 #define DEFAULT_COLOR   0b00001111			//(BLACK << 4 | WHITE)
 
 uint16_t	invert_color(uint16_t c);
+void		switch_window(int way);
 void		toggle_cursor(void);
 void		set_cursor_pos(int x, int y);
 uint16_t	get_cursor_pos(void);
@@ -149,7 +150,6 @@ int		poll_mouse(void);
 // ##################################################
 // #			drivers/devices/PS2/controller.c	#
 // ##################################################
-void	debug_byte(uint8_t data);
 int		safe_write_port(uint16_t port, uint8_t data);
 int		ACK_safe_write_port(uint16_t port, uint8_t data);
 int		safe_write_port_second_device(uint16_t port, uint8_t data);
@@ -158,7 +158,6 @@ int		safe_read_port(uint16_t port);
 void	flush(void);
 int		init_devices(void);
 int		poll(void);
-
 
 
 #endif

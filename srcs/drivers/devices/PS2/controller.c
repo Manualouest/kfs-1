@@ -6,19 +6,13 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:57:28 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:17:12 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 20:20:12 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
 int	second_device = 0;
-
-void	debug_byte(uint8_t byte) // DEBUG
-{
-	for (int i = 0; i < 8; ++i)
-		putchar(((byte >> (7 - i)) & 1) + '0');
-}
 
 // port 0x64 is to read status or send commands
 // port 0x60 is to read data received/return of command or send second part of command

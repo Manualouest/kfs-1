@@ -6,13 +6,12 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 18:26:55 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:32:27 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 21:01:58 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
-// TODO: PRINT 42
 void	kmain(void)
 {
 	init_terminal();
