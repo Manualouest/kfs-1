@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:55:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 20:03:32 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 18:58:12 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,13 @@
 
 # include <stdint.h>
 # include <stddef.h>
+
+
+typedef enum	STATE
+{
+	OFF,
+	ON
+}	STATE;
 
 
 // ##################################################
@@ -40,6 +47,7 @@ void vprintk(uint8_t color, const char *fmt, va_list args);
 void	*memset(void *s, int c, size_t n);
 void	bzero(void *s, size_t n);
 void	*memcpy(void *dest, const void *src, size_t n);
+void	swap(void *a, void *b);
 
 
 // ##################################################
@@ -82,6 +90,10 @@ uint16_t	get_cursor_pos(void);
 void		move_cursor(int move_x, int move_y);
 void		scroll_up(void);
 void		scroll_down(void);
+void		clipboard_to_cursor();
+void		region_to_clipboard(int8_t highlight_start[2], int8_t highlight_end[2]);
+void		highlight_char(int8_t pos[2], STATE state);
+void		highlight_region(int8_t highlight_start[2], int8_t highlight_end[2], STATE state);
 void		putchar_color(unsigned char c, uint8_t color);
 void		putchar(unsigned char c);
 void		write_color(const char *str, uint8_t color);
@@ -109,12 +121,6 @@ void			write_port(uint16_t port, uint8_t data);
 // ##################################################
 // #			drivers/devices/PS2/keyboard.c		#
 // ##################################################
-typedef enum	STATE
-{
-	OFF,
-	ON
-}	STATE;
-
 typedef enum	STATE_KEY
 {
 	INVALID,
@@ -133,8 +139,10 @@ STATE	get_state_key_status(STATE_KEY key);
 // ##################################################
 // #			drivers/devices/PS2/mouse.c			#
 // ##################################################
-void	update_mouse_pos(void);
 int		activate_mouse(void);
+int8_t	*get_highlight_start();
+int8_t	*get_highlight_end();
+void	update_mouse_pos(void);
 int		poll_mouse(void);
 
 

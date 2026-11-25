@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/21 00:05:00 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:32:42 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/24 20:39:26 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,4 +29,11 @@ void	*memset(void *s, int c, size_t n)
 void	bzero(void *s, size_t n)
 {
 	s = memset(s, 0, n);
+}
+
+void	swap(void *a, void *b)
+{
+	uint32_t	tmp = *(uint32_t *)a;
+	*(uint32_t *)a = *(uint32_t *)b;
+	*(uint32_t *)b = tmp;
 }

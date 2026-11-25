@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 18:35:15 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/25 19:43:54 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,8 +157,6 @@ int	poll_keyboard(void)
 	if (scancode == -1)
 		return (0);
 
-	update_mouse_pos();
-
 	if (special_keys(scancode))
 		return (1);
 
@@ -166,7 +164,13 @@ int	poll_keyboard(void)
 		return (1);
 
 	if (get_state_key_status(CTRL))
+	{
+		if (scancode== KEY_C)
+			region_to_clipboard(get_highlight_start(), get_highlight_end());
+		else if (scancode== KEY_V)
+			clipboard_to_cursor();
 		return (1);
+	}
 
 	if (get_state_key_status(ALT))
 		return (1);

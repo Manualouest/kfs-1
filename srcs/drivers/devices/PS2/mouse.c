@@ -6,15 +6,17 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 18:48:51 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:20:30 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 19:36:25 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <kernel.h>
 
-int				highlight_status;
 static float	mouse_x;
 static float	mouse_y;
+static int8_t	highlight_start[2];
+static int8_t	past_highlight_end[2];
+static int8_t	highlight_end[2];
 
 static int	set_sample_rate(uint8_t rate)
 {
@@ -46,7 +48,6 @@ static int get_mouseID(void)
 
 int	activate_mouse(void)
 {
-	highlight_status = 0;
 	mouse_x = 0;
 	mouse_y = 0;
 
@@ -81,46 +82,79 @@ int	activate_mouse(void)
 	return (1);
 }
 
-// TODO --> all this is reused to do copy-paste
-// static void	verify_mouse_pos()
-// {
-// 	if (mouse_x < 0)
-// 		mouse_x = 0;
-// 	if (mouse_x >= VGA_WIDTH)
-// 		mouse_x = VGA_WIDTH - 1;
-// 	if (mouse_y < 0)
-// 		mouse_y = 0;
-// 	if (mouse_y >= VGA_HEIGHT)
-// 		mouse_y = VGA_HEIGHT - 1;
-// }
+int8_t	*get_highlight_start()
+{
+	return (highlight_start);
+}
 
-// TODO --> all this is reused to do copy-paste
-// static void	move_mouse(uint8_t bytes[4])
-// {
-// 	mouse_x += (int)(bytes[0] & (1 << 4) ? (bytes[1] ^ 0xFFFFFF00) : bytes[1]) / 40.f;
-// 	mouse_y -= (int)(bytes[0] & (1 << 5) ? (bytes[2] ^ 0xFFFFFF00) : bytes[2]) / 40.f;
+int8_t	*get_highlight_end()
+{
+	return (highlight_end);
+}
 
-// 	verify_mouse_pos();
-// 	set_cursor_pos(int(mouse_x), int(mouse_y));
-// }
+static void	verify_mouse_pos()
+{
+	if (mouse_x < 0)
+		mouse_x = 0;
+	if (mouse_x >= VGA_WIDTH)
+		mouse_x = VGA_WIDTH - 1;
+	if (mouse_y < 0)
+		mouse_y = 0;
+	if (mouse_y >= VGA_HEIGHT)
+		mouse_y = VGA_HEIGHT - 1;
+}
+
+static void	move_mouse(uint8_t bytes[4])
+{
+	mouse_x += (int)(bytes[0] & (1 << 4) ? (bytes[1] ^ 0xFFFFFF00) : bytes[1]) / 40.f;
+	mouse_y -= (int)(bytes[0] & (1 << 5) ? (bytes[2] ^ 0xFFFFFF00) : bytes[2]) / 40.f;
+
+	verify_mouse_pos();
+}
 
 static void	process_inputs(uint8_t bytes[4])
 {
-	// TODO --> all this is reused to do copy-paste
-	// if (bytes[0] & (1 << 0) && !get_state_key_status(SCRL))
-	// {
-	// 	highlight_status = !highlight_status;
+	static STATE	highlight_started = 0;
+	if (bytes[0] & (1 << 0))
+	{
+		if (!highlight_started)
+		{
+			highlight_region(highlight_start, past_highlight_end, OFF);
+			highlight_start[0] = int(mouse_x);
+			highlight_start[1] = int(mouse_y);
+			past_highlight_end[0] = int(mouse_x);
+			past_highlight_end[1] = int(mouse_y);
+			highlight_started = ON;
+		}
+		highlight_region(highlight_start, past_highlight_end, OFF);
+		highlight_end[0] = (int8_t)int(mouse_x);
+		highlight_end[1] = (int8_t)int(mouse_y);
+		highlight_region(highlight_start, highlight_end, ON);
+		past_highlight_end[0] = highlight_end[0];
+		past_highlight_end[1] = highlight_end[1];
+	}
+	else
+		highlight_started = OFF;
 
-	// 	uint16_t	raw_pos = get_cursor_pos();
-	// 	int			pos_x = (int)(raw_pos % VGA_WIDTH);
-	// 	int			pos_y = (int)(raw_pos / VGA_WIDTH);
-
-	// 	mouse_x = pos_x;
-	// 	mouse_y = pos_y;
-	// }
-
-	// if (highlight_status)
-	// 	move_mouse(bytes);
+	int8_t	mouse_pos[2] = {(int8_t)int(mouse_x), (int8_t)int(mouse_y)};
+	int		switch_highlight = 0;
+	
+	if ((highlight_start[1] * VGA_WIDTH + highlight_start[0] - 1 < mouse_pos[1] * VGA_WIDTH + mouse_pos[0]
+		&& mouse_pos[1] * VGA_WIDTH + mouse_pos[0] < highlight_end[1] * VGA_WIDTH + highlight_end[0] + !highlight_started)
+		|| (highlight_end[1] * VGA_WIDTH + highlight_end[0] - !highlight_started < mouse_pos[1] * VGA_WIDTH + mouse_pos[0]
+			&& mouse_pos[1] * VGA_WIDTH + mouse_pos[0] < highlight_start[1] * VGA_WIDTH + highlight_start[0] + 1))
+		switch_highlight = 1;
+	if (switch_highlight)
+		highlight_char(mouse_pos, ON);
+	else
+		highlight_char(mouse_pos, OFF);
+	move_mouse(bytes);
+	mouse_pos[0] = (int8_t)int(mouse_x);
+	mouse_pos[1] = (int8_t)int(mouse_y);
+	if (switch_highlight)
+		highlight_char(mouse_pos, OFF);
+	else
+		highlight_char(mouse_pos, ON);
 
 	if (bytes[3] == 1 && get_state_key_status(SCRL) == OFF)
 		scroll_down();

@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 17:52:43 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 18:24:14 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 19:41:06 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ static size_t				scroll_y;
 static size_t				offset_y;
 static volatile uint16_t	buffer_terminal[FULL_HEIGHT * FULL_WIDTH] = {0};
 
+static volatile uint16_t	clipboard[VGA_HEIGHT + 1][VGA_WIDTH + 1] = {0}; // TODO: change buffer to a line by line
+
 static void	evil_scroll_down(void);
 
 static int	cursos_status;
@@ -41,7 +43,7 @@ static inline uint8_t	setup_color(uint8_t front, uint8_t back)
 
 inline uint16_t	invert_color(uint16_t c)
 {
-	return (((c & 01111000000000000) >> 4) | ((c & 00000111100000000) << 4) | (c & 0b11111111));
+	return (((c & 0b1111000000000000) >> 4) | ((c & 0b0000111100000000) << 4) | (c & 0b11111111));
 }
 
 void	toggle_cursor(void)
@@ -159,6 +161,104 @@ static void	evil_scroll_down(void)
 	move_cursor(0, 1);
 }
 
+void	clipboard_to_cursor()
+{
+	for (size_t i = 0; i < VGA_HEIGHT; ++i)
+	{
+		for (size_t ii = 0; clipboard[i][ii]; ++ii)
+			putchar_color(clipboard[i][ii], clipboard[i][ii] >> 8);
+		if (clipboard[i + 1][0])
+			newline();
+	}
+}
+
+void	region_to_clipboard(int8_t highlight_start[2], int8_t highlight_end[2])
+{
+	int8_t	start[2] = {highlight_start[0], highlight_start[1]};
+	int8_t	end[2] = {highlight_end[0], highlight_end[1]};
+	if (start[1] == end[1] && start[0] > end[0])
+	{
+		uint8_t	tmp = start[0];
+		start[0] = end[0];
+		end[0] = tmp;
+	}
+	if (start[1] > end[1])
+	{
+		uint8_t	tmp = start[1];
+		start[1] = end[1];
+		end[1] = tmp;
+		tmp = start[0];
+		start[0] = end[0];
+		end[0] = tmp;
+	}
+
+	for (size_t i = 0; i < VGA_HEIGHT; ++i)
+		for (size_t ii = 0; ii < VGA_WIDTH; ++ii)
+			clipboard[i][ii] = 0;
+
+	int	clip_i = end[1] - start[1];
+	int	clip_ii = end[0];
+	if (start[1] == end[1])
+		clip_ii = end[0] - start[0];
+	int	in_empty = 1;
+	for (int i = end[1] * VGA_WIDTH + end[0]; i >= start[1] * VGA_WIDTH + start[0]; --i) // TODO: make this a line by line copy
+	{
+		if (in_empty && (visible_terminal[i] & 0xFF) == ' ')
+			clipboard[clip_i][clip_ii] = 0;
+		else
+		{
+			in_empty = 0;
+			if (visible_terminal[i] >> 12)
+				clipboard[clip_i][clip_ii] = invert_color(visible_terminal[i]);
+			else
+				clipboard[clip_i][clip_ii] = visible_terminal[i];
+		}
+		clip_ii --;
+		if (clip_ii < 0)
+		{
+			clip_i --;
+			clip_ii = VGA_WIDTH - 1;
+			in_empty = 1;
+		}
+	}
+}
+
+void	highlight_char(int8_t pos[2], STATE state)
+{
+	if (state && !(visible_terminal[pos[1] * VGA_WIDTH + pos[0]] >> 12))
+		visible_terminal[pos[1] * VGA_WIDTH + pos[0]] = invert_color(visible_terminal[pos[1] * VGA_WIDTH + pos[0]]);
+	else if (!state && (visible_terminal[pos[1] * VGA_WIDTH + pos[0]] >> 12))
+		visible_terminal[pos[1] * VGA_WIDTH + pos[0]] = invert_color(visible_terminal[pos[1] * VGA_WIDTH + pos[0]]);
+}
+
+void	highlight_region(int8_t highlight_start[2], int8_t highlight_end[2], STATE state)
+{
+	int8_t	start[2] = {highlight_start[0], highlight_start[1]};
+	int8_t	end[2] = {highlight_end[0], highlight_end[1]};
+	if (start[1] == end[1] && start[0] > end[0])
+	{
+		uint8_t	tmp = start[0];
+		start[0] = end[0];
+		end[0] = tmp;
+	}
+	if (start[1] > end[1])
+	{
+		uint8_t	tmp = start[1];
+		start[1] = end[1];
+		end[1] = tmp;
+		tmp = start[0];
+		start[0] = end[0];
+		end[0] = tmp;
+	}
+	for (int i = start[1] * VGA_WIDTH + start[0]; i <= end[1] * VGA_WIDTH + end[0]; ++i)
+	{
+		if (state && !(visible_terminal[i] >> 12))
+			visible_terminal[i] = invert_color(visible_terminal[i]);
+		else if (!state && (visible_terminal[i] >> 12))
+			visible_terminal[i] = invert_color(visible_terminal[i]);
+	}
+}
+
 static int	is_special_char(unsigned char c)
 {
 	switch (c)
@@ -271,6 +371,10 @@ void	clear_screen(void)
 
 	for (size_t index = 0; index < FULL_HEIGHT * FULL_WIDTH; ++index)
 		buffer_terminal[index] = encode_char(' ', DEFAULT_COLOR);
+
+	for (size_t i = 0; i < VGA_HEIGHT + 1; ++i)
+		for (size_t ii = 0; ii < VGA_WIDTH + 1; ++ii)
+			clipboard[i][ii] = encode_char(0, 0);
 
 	x = 0;
 	y = 0;

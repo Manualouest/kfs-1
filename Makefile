@@ -127,8 +127,3 @@ build/%.o: %.s
 	@mkdir -p $(dir $@)
 	
 	@$(CC) $(CFLAGS) -c $< -o $@
-
-
-
-# mewen a dit ca marche aussi
-# qemu-system-i386 -serial stdio --kernel build/kernel.bin
