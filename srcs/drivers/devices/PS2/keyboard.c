@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/24 20:15:57 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/25 18:35:15 by eblondee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,20 @@ enum KEYS{	NONE, KEY_ESCAPE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KE
 			KEY_CAPS_LOCK, KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_NUM_LOCK, KEY_SCROLL_LOCK,
 			KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_SUB, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_ADD, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_0,
 			KEY_KP_DOT, BAD, BAD1, BAD2, KEY_F11, KEY_F12 };
-static const char		*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
+static const char	*key_values[89] = {	"BAD", "ESCAPE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "BACKSPACE", "TAB",
 									"q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "ENTER", "LEFT_CTRL",
 									"a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "`", "LEFT_SHIFT", "\\",
 									"z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "RIGHT_SHIFT", "*", "LEFT_ALT", " ", "CAPS_LOCK",
 									"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "NUM_LOCK", "SCROLL_LOCK",
 									"7", "8", "9", "-", "4", "5", "6", "+", "1", "2", "3", "0", ".", "BAD", "BAD", "BAD", "F11", "F12"};
+
+static const char	*shift_value[89] = { "BAD", "ESCAPE", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "BACKSPACE", "TAB",
+									"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "ENTER", "LEFT_CTRL",
+									"A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"", "~", "LEFT_SHIFT", "|",
+									"Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "RIGHT_SHIFT", "*", "LEFT_ALT", " ", "CAPS_LOCK",
+									"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "NUM_LOCK", "SCROLL_LOCK",
+									"7", "8", "9", "-", "4", "5", "6", "+", "1", "2", "3", "0", ".", "BAD", "BAD", "BAD", "F11", "F12"};
+
 static uint8_t	keyboard_state = 0;
 
 
@@ -166,8 +174,15 @@ int	poll_keyboard(void)
 	if (get_state_key_status(NUM) == OFF && key_is_from_keypad(scancode))
 		return (1);
 
-	if ((get_state_key_status(SHIFT) ^ get_state_key_status(CAPS)) && is_alpha(key_values[scancode][0]))
-		printk("%c", 'A' + (key_values[scancode][0] - 'a'));
+	if ((get_state_key_status(SHIFT) ^ get_state_key_status(CAPS))) 
+	{
+		if (get_state_key_status(CAPS) && is_alpha(key_values[scancode][0]))
+			printk("%c", shift_value[scancode][0]);
+		else if (get_state_key_status(SHIFT))
+			printk("%c", shift_value[scancode][0]);
+		else
+			printk("%c", key_values[scancode][0]);
+	}
 	else
 		printk("%c", key_values[scancode][0]);
 
