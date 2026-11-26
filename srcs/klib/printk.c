@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   printk.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eblondee <eblondee@student.42angouleme.fr  +#+  +:+       +#+        */
+/*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/20 18:22:40 by eblondee          #+#    #+#             */
-/*   Updated: 2026/11/20 22:26:29 by eblondee         ###   ########.fr       */
+/*   Updated: 2026/11/26 10:10:22 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void vprintk(uint8_t color, const char *fmt, va_list args)
 				break;
 			case 'd':
 			case 'i':
-				print_number(va_arg(args, long long int), color);
+				print_number(va_arg(args, long int), color);
 				break;
 			case 'u':
 				print_unsigned(va_arg(args, unsigned int), 10, 0, color);

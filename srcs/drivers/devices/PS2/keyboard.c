@@ -6,7 +6,7 @@
 /*   By: mbirou <mbirou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/19 23:24:49 by mbirou            #+#    #+#             */
-/*   Updated: 2026/11/25 20:50:45 by mbirou           ###   ########.fr       */
+/*   Updated: 2026/11/26 10:07:25 by mbirou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static uint8_t	keyboard_state = 0;
 
 inline STATE	get_state_key_status(STATE_KEY key)
 {
-	return (keyboard_state & key);
+	return ((keyboard_state & key) != 0);
 }
 
 static inline void	set_state_key_status(STATE_KEY key, STATE state)
@@ -185,7 +185,7 @@ int	poll_keyboard(void)
 	if (get_state_key_status(NUM) == OFF && key_is_from_keypad(scancode))
 		return (1);
 
-	if ((get_state_key_status(SHIFT) ^ get_state_key_status(CAPS))) 
+	if (get_state_key_status(SHIFT) ^ get_state_key_status(CAPS))
 	{
 		if (get_state_key_status(CAPS) && is_alpha(key_values[scancode][0]))
 			printk("%c", shift_value[scancode][0]);

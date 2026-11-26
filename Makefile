@@ -7,6 +7,8 @@ NAME        := OScrat.iso
 BUILD_DIR	:= build/
 ISO_DIR     := $(BUILD_DIR)iso
 
+ISOFLAGS	:= --locales="" --themes="" --fonts="" --install-modules="normal multiboot multiboot2 biosdisk iso9660"
+
 KERNEL_BIN  := $(BUILD_DIR)kernel.bin
 
 ######################################################
@@ -86,7 +88,7 @@ $(NAME): $(KERNEL_BIN) $(GCONF)
 	@printf "$(C3)>>> Copy $(basename $(GCONF)) <<<$(NOC)"
 	@cp $(GCONF) $(ISO_DIR)/boot/grub/grub.cfg
 	@printf "$(C4)>>> Creating $(NAME) <<<$(NOC)"
-	@out=$$(grub-mkrescue -o $(NAME) $(ISO_DIR) 2>&1) || \
+	@out=$$(grub-mkrescue $(ISOFLAGS) -o $(NAME) $(ISO_DIR) 2>&1) || \
 		{ echo "$(CE)$$out$(NOC)"; exit 1; }
 
 $(KERNEL_BIN): $(OBJS) $(LINKER)
